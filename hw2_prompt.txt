@@ -1,0 +1,15 @@
+Using a programming environment of your choice (such as Matlab, Scilab
+or Python) write a Newton-Raphson power flow, and use it to solve the
+five bus system presented in class. You can either hard code the five
+bus system data in your program, or you can input it from, say, text
+files.  The input is the per unit power for the PQ buses, the voltage
+setpoints for the generators, and the transmission line and transformer
+pi model parameters.  You need to code PQ, PV and (obviously) a slack
+bus. However, you do not need to code generator reactive power limits.
+Use a flat start initial guess, except set the PV bus voltage to the
+generator setpoint voltage. Your output should be a list of the bus
+voltage magnitudes and angles at each iteration. Also calculate the
+reactive power output for the generators and the real power output for
+the slack bus generator. Use a 100 MVA per unit base, and use a per unit
+convergence value of 0.1 MVA. Turn in the output and a complete listing
+of your program.
