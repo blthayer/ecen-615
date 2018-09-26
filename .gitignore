@@ -1,3 +1,6 @@
+# Ignore pdf files
+*.pdf
+
 # Ignore the venv.
 venv/**
 
