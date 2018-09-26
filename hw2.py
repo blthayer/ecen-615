@@ -5,6 +5,7 @@ For assignment details, see hw2_prompt.txt
 # Installed packages.
 import numpy as np
 import pandas as pd
+from tabulate import tabulate
 
 # Files containing system data.
 BUS_FILE = 'hw2_buses.csv'
@@ -12,8 +13,8 @@ LINES_FILE = 'hw2_lines.csv'
 XFMRS_FILE = 'hw2_xfmrs.csv'
 
 # Constants.
-S_BASE = 100
-TOL = 0.1/S_BASE
+MVA_BASE = 100
+TOL = 0.1 / MVA_BASE
 
 def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
          xfmrs_file=XFMRS_FILE):
@@ -71,7 +72,18 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
     # Silly initialization so we start the loop.
     f_x = 1 + TOL
 
+    print('Voltages and angles at each iteration:')
+
     while (not np.all(np.abs(f_x) < TOL)) and (it_count < 100):
+
+        # Print at start of each iteration.
+        # print('*' * 79)
+        print('Iteration {}:'.format(it_count))
+        print(tabulate({'Bus': bus_data.index.values,
+                        'Voltage (pu)': v, 'Angle (degrees)': theta*180/np.pi},
+                       headers='keys', tablefmt="grid"))
+        print('')
+
         # Pre-compute Ykn * Vn.
         ykn_vn = v * y_mag
         # Pre-compute y_kn * v_k. Transposing to multiply column-wise.
@@ -93,13 +105,6 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
 
         # Stack the mismatches, sans swing bus.
         f_x = np.concatenate([p_m[non_swing], q_m[non_swing]])
-
-        # Correct q for PV buses: should be 0.
-        pv_q = f_x[~pv_bool]
-        f_x[~pv_bool] = 0
-
-        print('Mismatches at iteration {}:'.format(it_count))
-        print(f_x)
 
         # Stack theta and v, sans swing bus.
         x = np.concatenate((theta[non_swing], v[non_swing]))
@@ -147,6 +152,18 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
 
         # Update iteration counter.
         it_count += 1
+
+    # Generator outputs:
+    buses = [bus_data.index[0], *bus_data.iloc[1:].loc[~non_pv].index.values]
+    gen_p = (np.array([-p_m.iloc[0],
+                       *bus_data[non_swing][~non_pv]['P_G'].values])
+             * MVA_BASE)
+    gen_q = np.array([-q_m.iloc[0], *-q_m.iloc[1:].loc[~non_pv]]) * MVA_BASE
+    print('Final Generator Outputs:')
+    print(tabulate({'Generator Bus': buses,
+                    'Active Power (MW)': gen_p,
+                    'Reactive Power (Mvar)': gen_q}, headers='keys',
+                   tablefmt='grid'))
 
 
 def get_y_bus(bus_data, lines_file, xfmrs_file):
