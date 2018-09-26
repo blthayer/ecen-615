@@ -1,7 +1,16 @@
 """Module for solving power flow for ECEN 615 HW2, Fall 2018.
 
-For assignment details, see hw2_prompt.txt
+Package prerequisites (simply install with pip): numpy, pandas, tabulate
+
+It is assumed that this script will be run from the directory in which
+it resides, and that the files with names described by the constants
+BUS_FILE, LINES_FILE, and XFMRS_FILE also live in the same directory.
+
+For assignment details, see hw2_prompt.txt.
 """
+# Standard library.
+import sys
+
 # Installed packages.
 import numpy as np
 import pandas as pd
@@ -12,9 +21,16 @@ BUS_FILE = 'hw2_buses.csv'
 LINES_FILE = 'hw2_lines.csv'
 XFMRS_FILE = 'hw2_xfmrs.csv'
 
+# File for printing output:
+OUT_FILE = 'hw2_output.txt'
+
+# Pipe output to file.
+sys.stdout = open(OUT_FILE, 'w')
+
 # Constants.
 MVA_BASE = 100
 TOL = 0.1 / MVA_BASE
+
 
 def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
          xfmrs_file=XFMRS_FILE):
