@@ -17,15 +17,15 @@ import pandas as pd
 from tabulate import tabulate
 
 # Files containing system data.
-BUS_FILE = 'hw2_buses.csv'
-LINES_FILE = 'hw2_lines.csv'
-XFMRS_FILE = 'hw2_xfmrs.csv'
+BUS_FILE = '5_bus_buses.csv'
+LINES_FILE = '5_bus_lines.csv'
+XFMRS_FILE = '5_bus_xfmrs.csv'
 
 # File for printing output:
-OUT_FILE = 'hw2_output.txt'
+OUT_FILE = 'hw3_output.txt'
 
 # Pipe output to file.
-sys.stdout = open(OUT_FILE, 'w')
+#sys.stdout = open(OUT_FILE, 'w')
 
 # Constants.
 MVA_BASE = 100
@@ -33,7 +33,7 @@ TOL = 0.1 / MVA_BASE
 
 
 def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
-         xfmrs_file=XFMRS_FILE):
+         xfmrs_file=XFMRS_FILE, out_file=OUT_FILE):
     """Solve the power flow.
 
     bus_file should have the following columns: Bus, Type, V_pu, P_G,
@@ -73,8 +73,10 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
     v, theta = flat_start(bus_data)
 
     # Get the y_bus matrix.
-    y_bus = get_y_bus(bus_data=bus_data, lines_file=lines_file,
-                      xfmrs_file=xfmrs_file)
+    lines_data = pd.read_csv(lines_file)
+    xfmrs_data = pd.read_csv(xfmrs_file)
+    y_bus = get_y_bus(bus_data=bus_data, lines_data=lines_data,
+                      xfmrs_data=xfmrs_data)
     # Grab polar components (using GSO book). For some reason, the
     # np.abs call returns a DataFrame, while the np.angle call returns
     # a np.ndarray
@@ -88,17 +90,20 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
     # Silly initialization so we start the loop.
     f_x = 1 + TOL
 
-    print('Voltages and angles at each iteration:')
+    # Open output file.
+    f_out = open(out_file, 'w')
+
+    print('Voltages and angles at each iteration:', file=f_out)
 
     while (not np.all(np.abs(f_x) < TOL)) and (it_count < 100):
 
         # Print at start of each iteration.
         # print('*' * 79)
-        print('Iteration {}:'.format(it_count))
+        print('Iteration {}:'.format(it_count), file=f_out)
         print(tabulate({'Bus': bus_data.index.values,
                         'Voltage (pu)': v, 'Angle (degrees)': theta*180/np.pi},
-                       headers='keys', tablefmt="grid"))
-        print('')
+                       headers='keys', tablefmt="grid"), file=f_out)
+        print('', file=f_out)
 
         # Pre-compute Ykn * Vn.
         ykn_vn = v * y_mag
@@ -175,25 +180,25 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
                        *bus_data[non_swing][~non_pv]['P_G'].values])
              * MVA_BASE)
     gen_q = np.array([-q_m.iloc[0], *-q_m.iloc[1:].loc[~non_pv]]) * MVA_BASE
-    print('Final Generator Outputs:')
+    print('Final Generator Outputs:', file=f_out)
     print(tabulate({'Generator Bus': buses,
                     'Active Power (MW)': gen_p,
                     'Reactive Power (Mvar)': gen_q}, headers='keys',
-                   tablefmt='grid'))
+                   tablefmt='grid'), file=f_out)
 
 
-def get_y_bus(bus_data, lines_file, xfmrs_file):
+def get_y_bus(bus_data, lines_data, xfmrs_data):
     """
 
-    :param n_buses: integer, number of buses in the system.
-    :param lines_file: string, file with line data.
-    :param xfmrs_file: string, file with transformer data.
+    :param bus_data: pandas DataFrame with bus data.
+    :param lines_data: pandas DataFrame with line data.
+    :param xfmrs_data: pandas DataFrame with transformer data.
     :return: y_bus: numpy array with shape [n_buses, n_buses],
              representing the system Y bus matrix.
 
     Expected file headers (same for both):
         lines_file: From, To, R_pu, X_pu, G_pu, B_pu, MVA_max
-        xfmrs_file: From, To, R_pu, X_pu, G_pu, B_pu, MVA_max
+        xfmrs_data: From, To, R_pu, X_pu, G_pu, B_pu, MVA_max
     """
     # Get number of buses.
     n = bus_data.shape[0]
@@ -201,32 +206,51 @@ def get_y_bus(bus_data, lines_file, xfmrs_file):
     y_bus = pd.DataFrame(np.zeros((n, n), dtype=np.complex_),
                          index=bus_data.index, columns=bus_data.index)
 
-    # Read files.
-    lines = pd.read_csv(lines_file)
-    xfmrs = pd.read_csv(xfmrs_file)
-
     # Combine the two DataFrames.
-    elements = pd.concat([lines, xfmrs])
+    elements = pd.concat([lines_data, xfmrs_data])
 
     # Loop over all passive elements and add to the Y-bus.
-    for _, row in elements.iterrows():
+    for row in elements.itertuples():
         # Grab From and To as indices into the Y-bus.
-        f = row['From'].astype(int)
-        t = row['To'].astype(int)
+        f = getattr(row, 'From')
+        t = getattr(row, 'To')
+
+        # Extract r, x, g, and b for easy access.
+        r = getattr(row, 'R_pu')
+        x = getattr(row, 'X_pu')
+        g = getattr(row, 'G_pu')
+        b = getattr(row, 'B_pu')
 
         # Compute admittance between buses.
-        y = 1 / (row['R_pu'] + 1j*row['X_pu'])
+        y_series = 1 / (r + 1j*x)
 
-        # Compute shunt admittance
-        y_shunt = row['G_pu'] + 1j*row['B_pu']
+        # Compute shunt admittance: [from, to].
+        y_shunt = pd.Series([g + 1j*b, g + 1j*b], index=[f,t])
+
+        # If we have a tap ratio, we need to modify both shunt elements
+        # and the series elements.
+        tap_ratio = getattr(row, 'Tap_ratio')
+
+        if not pd.isnull(tap_ratio):
+            # ASSUMPTION: xfmrs_data is given such that the tap is on
+            # the FROM bus.
+
+            # Adjust 'from' bus shunt admittance:
+            y_shunt[f] = y_shunt[f] * (1 / tap_ratio**2 - 1 / tap_ratio)
+
+            # Adjust 'to' bus shunt admittance:
+            y_shunt[t] = y_shunt[t] * (1 - 1 / tap_ratio)
+
+            # Adjust the series admittance:
+            y_series = y_series / tap_ratio
 
         # Add admittance to diagonal elements:
         for i in [f, t]:
-            y_bus.loc[i, i] += (y + y_shunt/2)
+            y_bus.loc[i, i] += y_series + y_shunt[i] / 2
 
         # Subtract from off-diagonals.
-        y_bus.loc[f, t] -= y
-        y_bus.loc[t, f] -= y
+        y_bus.loc[f, t] -= y_series
+        y_bus.loc[t, f] -= y_series
 
     # Done, return.
     return y_bus
