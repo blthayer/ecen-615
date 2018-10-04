@@ -1,6 +1,7 @@
 # Ignore pdf files
 *.pdf
 
+__pycache__*
 # Ignore the venv.
 venv/**
 

@@ -10,19 +10,27 @@ For assignment details, see hw2_prompt.txt.
 """
 # Standard library.
 import sys
+from os.path import join as opj
 
 # Installed packages.
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
 
+# Local code.
+import lu
+
+# Directory containing system data.
+IN_DIR = 'powerflow_files'
+
 # Files containing system data.
-BUS_FILE = '5_bus_buses.csv'
-LINES_FILE = '5_bus_lines.csv'
-XFMRS_FILE = '5_bus_xfmrs.csv'
+BUS_FILE = opj(IN_DIR, '5_bus_buses.csv')
+LINES_FILE = opj(IN_DIR, '5_bus_lines.csv')
+XFMRS_FILE = opj(IN_DIR, '5_bus_xfmrs.csv')
 
 # File for printing output:
-OUT_FILE = 'hw3_output.txt'
+OUT_DIR = 'powerflow_files'
+OUT_FILE = opj(OUT_DIR, 'hw3_output.txt')
 
 # Pipe output to file.
 #sys.stdout = open(OUT_FILE, 'w')
@@ -32,8 +40,8 @@ MVA_BASE = 100
 TOL = 0.1 / MVA_BASE
 
 
-def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
-         xfmrs_file=XFMRS_FILE, out_file=OUT_FILE):
+def main(bus_file=BUS_FILE, lines_file=LINES_FILE, xfmrs_file=XFMRS_FILE,
+         out_file=OUT_FILE, use_taps=False, solver='lu'):
     """Solve the power flow.
 
     bus_file should have the following columns: Bus, Type, V_pu, P_G,
@@ -76,7 +84,7 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
     lines_data = pd.read_csv(lines_file)
     xfmrs_data = pd.read_csv(xfmrs_file)
     y_bus = get_y_bus(bus_data=bus_data, lines_data=lines_data,
-                      xfmrs_data=xfmrs_data)
+                      xfmrs_data=xfmrs_data, use_taps=use_taps)
     # Grab polar components (using GSO book). For some reason, the
     # np.abs call returns a DataFrame, while the np.angle call returns
     # a np.ndarray
@@ -160,7 +168,10 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
         f_x = f_x[pv_bool]
 
         # Compute next iteration.
-        x = x + np.linalg.solve(J_p, f_x)
+        if solver == 'numpy':
+            x = x + np.linalg.solve(J_p, f_x)
+        elif solver == 'lu':
+            x = x + lu.solve(J_p, f_x)
 
         # Extract theta from x, add swing angle (0) back in.
         theta = np.array([0, *x[0:N]])
@@ -187,12 +198,14 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE,
                    tablefmt='grid'), file=f_out)
 
 
-def get_y_bus(bus_data, lines_data, xfmrs_data):
+def get_y_bus(bus_data, lines_data, xfmrs_data, use_taps):
     """
 
     :param bus_data: pandas DataFrame with bus data.
     :param lines_data: pandas DataFrame with line data.
     :param xfmrs_data: pandas DataFrame with transformer data.
+    :param use_taps: boolean. If True, off-nominal taps will be
+                     accounted for. Ignored if False.
     :return: y_bus: numpy array with shape [n_buses, n_buses],
              representing the system Y bus matrix.
 
@@ -227,22 +240,23 @@ def get_y_bus(bus_data, lines_data, xfmrs_data):
         # Compute shunt admittance: [from, to].
         y_shunt = pd.Series([g + 1j*b, g + 1j*b], index=[f,t])
 
-        # If we have a tap ratio, we need to modify both shunt elements
-        # and the series elements.
-        tap_ratio = getattr(row, 'Tap_ratio')
+        if use_taps:
+            # If we have a tap ratio, we need to modify both shunt
+            # elements and the series elements.
+            tap_ratio = getattr(row, 'Tap_ratio')
 
-        if not pd.isnull(tap_ratio):
-            # ASSUMPTION: xfmrs_data is given such that the tap is on
-            # the FROM bus.
+            if not pd.isnull(tap_ratio):
+                # ASSUMPTION: xfmrs_data is given such that the tap is on
+                # the FROM bus.
 
-            # Adjust 'from' bus shunt admittance:
-            y_shunt[f] = y_shunt[f] * (1 / tap_ratio**2 - 1 / tap_ratio)
+                # Adjust 'from' bus shunt admittance:
+                y_shunt[f] = y_shunt[f] * (1 / tap_ratio**2 - 1 / tap_ratio)
 
-            # Adjust 'to' bus shunt admittance:
-            y_shunt[t] = y_shunt[t] * (1 - 1 / tap_ratio)
+                # Adjust 'to' bus shunt admittance:
+                y_shunt[t] = y_shunt[t] * (1 - 1 / tap_ratio)
 
-            # Adjust the series admittance:
-            y_series = y_series / tap_ratio
+                # Adjust the series admittance:
+                y_series = y_series / tap_ratio
 
         # Add admittance to diagonal elements:
         for i in [f, t]:
@@ -289,4 +303,8 @@ def flat_start(bus_data):
 
 
 if __name__ == '__main__':
-    main()
+    # Use taps for problem 1.
+    main(use_taps=True, out_file=opj(OUT_DIR, 'hw_3_problem_1_output.txt'))
+
+    # Do not use taps for problem 3.
+    main(use_taps=False, out_file=opj(OUT_DIR, 'hw_3_problem_3_output.txt'))
