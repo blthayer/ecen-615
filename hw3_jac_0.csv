@@ -1,0 +1,9 @@
+﻿Number,Name,Jacobian Equation,Angle Bus 1,Angle Bus 2,Angle Bus 3,Angle Bus 4,Angle Bus 5,Volt Mag Bus 1,Volt Mag Bus 2,Volt Mag Bus 3,Volt Mag Bus 4,Volt Mag Bus 5
+2,Two,Real Power,,29.76,,-9.92,-19.84,,2.68,,-0.89,-1.79
+2,Two,Reactive Power,,-2.68,,0.89,1.79,,27.16,,-9.92,-19.84
+3,Three,Real Power,,,106.5,-106.5,,,,8.69,-7.99,
+3,Three,Voltage Magnitude,,,,,,,,1,,
+4,Four,Reactive Power,,0.89,7.99,-12.45,3.57,,-9.92,-101.43,139.82,-39.68
+4,Four,Real Power,,-9.92,-106.5,156.1,-39.68,,-0.89,-7.61,11.39,-3.57
+5,Five,Real Power,,-19.84,,-39.68,109.24,,-1.79,,-3.57,9.09
+5,Five,Reactive Power,,1.79,,3.57,-9.09,,-19.84,,-39.68,107.92
