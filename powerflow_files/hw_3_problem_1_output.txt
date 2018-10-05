@@ -1,0 +1,75 @@
+Voltages and angles at each iteration:
+Iteration 0:
+\begin{tabular}{rrr}
+\hline
+   Bus &   Voltage (pu) &   Angle (degrees) \\
+\hline
+     1 &           1    &                 0 \\
+     2 &           1    &                 0 \\
+     3 &           1.05 &                 0 \\
+     4 &           1    &                 0 \\
+     5 &           1    &                 0 \\
+\hline
+\end{tabular}
+
+Iteration 1:
+\begin{tabular}{rrr}
+\hline
+   Bus &   Voltage (pu) &   Angle (degrees) \\
+\hline
+     1 &        1       &          0        \\
+     2 &        0.94277 &        -18.5114   \\
+     3 &        1.05    &          0.248398 \\
+     4 &        1.04212 &         -2.18048  \\
+     5 &        1.01154 &         -4.18366  \\
+\hline
+\end{tabular}
+
+Iteration 2:
+\begin{tabular}{rrr}
+\hline
+   Bus &   Voltage (pu) &   Angle (degrees) \\
+\hline
+     1 &       1        &          0        \\
+     2 &       0.851345 &        -21.526    \\
+     3 &       1.05     &         -0.439124 \\
+     4 &       1.02165  &         -2.73039  \\
+     5 &       0.979098 &         -4.4854   \\
+\hline
+\end{tabular}
+
+Iteration 3:
+\begin{tabular}{rrr}
+\hline
+   Bus &   Voltage (pu) &   Angle (degrees) \\
+\hline
+     1 &       1        &           0       \\
+     2 &       0.833969 &         -22.3829  \\
+     3 &       1.05     &          -0.54501 \\
+     4 &       1.01887  &          -2.82808 \\
+     5 &       0.974186 &          -4.54617 \\
+\hline
+\end{tabular}
+
+Iteration 4:
+\begin{tabular}{rrr}
+\hline
+   Bus &   Voltage (pu) &   Angle (degrees) \\
+\hline
+     1 &       1        &          0        \\
+     2 &       0.833113 &        -22.4293   \\
+     3 &       1.05     &         -0.549464 \\
+     4 &       1.01874  &         -2.83225  \\
+     5 &       0.97395  &         -4.54897  \\
+\hline
+\end{tabular}
+
+Final Generator Outputs:
+\begin{tabular}{rrr}
+\hline
+   Generator Bus &   Active Power (MW) &   Reactive Power (Mvar) \\
+\hline
+               1 &             394.923 &                 115.973 \\
+               3 &             520     &                 337.131 \\
+\hline
+\end{tabular}

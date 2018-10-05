@@ -41,7 +41,7 @@ TOL = 0.1 / MVA_BASE
 
 
 def main(bus_file=BUS_FILE, lines_file=LINES_FILE, xfmrs_file=XFMRS_FILE,
-         out_file=OUT_FILE, use_taps=False, solver='lu'):
+         out_file=OUT_FILE, use_taps=False, solver='lu', tablefmt='latex'):
     """Solve the power flow.
 
     bus_file should have the following columns: Bus, Type, V_pu, P_G,
@@ -110,7 +110,7 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE, xfmrs_file=XFMRS_FILE,
         print('Iteration {}:'.format(it_count), file=f_out)
         print(tabulate({'Bus': bus_data.index.values,
                         'Voltage (pu)': v, 'Angle (degrees)': theta*180/np.pi},
-                       headers='keys', tablefmt="grid"), file=f_out)
+                       headers='keys', tablefmt=tablefmt), file=f_out)
         print('', file=f_out)
 
         # Pre-compute Ykn * Vn.
@@ -195,7 +195,7 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE, xfmrs_file=XFMRS_FILE,
     print(tabulate({'Generator Bus': buses,
                     'Active Power (MW)': gen_p,
                     'Reactive Power (Mvar)': gen_q}, headers='keys',
-                   tablefmt='grid'), file=f_out)
+                   tablefmt=tablefmt), file=f_out)
 
 
 def get_y_bus(bus_data, lines_data, xfmrs_data, use_taps):
@@ -220,7 +220,7 @@ def get_y_bus(bus_data, lines_data, xfmrs_data, use_taps):
                          index=bus_data.index, columns=bus_data.index)
 
     # Combine the two DataFrames.
-    elements = pd.concat([lines_data, xfmrs_data])
+    elements = pd.concat([lines_data, xfmrs_data], sort=False)
 
     # Loop over all passive elements and add to the Y-bus.
     for row in elements.itertuples():
@@ -303,8 +303,11 @@ def flat_start(bus_data):
 
 
 if __name__ == '__main__':
-    # Use taps for problem 1.
-    main(use_taps=True, out_file=opj(OUT_DIR, 'hw_3_problem_1_output.txt'))
+    # Homework 3:
+    # Problem 1: Use off-nominal taps and the numpy solver.
+    main(use_taps=True, out_file=opj(OUT_DIR, 'hw_3_problem_1_output.txt'),
+         solver='numpy')
 
-    # Do not use taps for problem 3.
-    main(use_taps=False, out_file=opj(OUT_DIR, 'hw_3_problem_3_output.txt'))
+    # Problem 2: Do not use off-nominal taps, and use my lu solver.
+    main(use_taps=False, out_file=opj(OUT_DIR, 'hw_3_problem_3_output.txt'),
+         solver='lu')
