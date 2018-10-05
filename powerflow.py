@@ -249,11 +249,13 @@ def get_y_bus(bus_data, lines_data, xfmrs_data, use_taps):
                 # ASSUMPTION: xfmrs_data is given such that the tap is on
                 # the FROM bus.
 
-                # Adjust 'from' bus shunt admittance:
-                y_shunt[f] = y_shunt[f] * (1 / tap_ratio**2 - 1 / tap_ratio)
+                # Adjust 'from' bus shunt admittance. NOTE: using a
+                # 2 * so that it cancels with the / 2 later.
+                y_shunt[f] = 2 * y_shunt[f] * \
+                             (1 / tap_ratio**2 - 1 / tap_ratio)
 
                 # Adjust 'to' bus shunt admittance:
-                y_shunt[t] = y_shunt[t] * (1 - 1 / tap_ratio)
+                y_shunt[t] = 2 * y_shunt[t] * (1 - 1 / tap_ratio)
 
                 # Adjust the series admittance:
                 y_series = y_series / tap_ratio
