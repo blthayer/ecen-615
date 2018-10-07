@@ -238,33 +238,41 @@ def get_y_bus(bus_data, lines_data, xfmrs_data, use_taps):
         y_series = 1 / (r + 1j*x)
 
         # Compute shunt admittance: [from, to].
-        y_shunt = pd.Series([g + 1j*b, g + 1j*b], index=[f,t])
+        y_shunt = g + 1j*b
 
-        if use_taps:
-            # If we have a tap ratio, we need to modify both shunt
-            # elements and the series elements.
-            tap_ratio = getattr(row, 'Tap_ratio')
+        # Extract the tap_ratio. Will be NaN/null if there's no
+        # off-nominal taps ratio (like for a line).
+        tap_ratio = getattr(row, 'Tap_ratio')
 
-            if not pd.isnull(tap_ratio):
-                # ASSUMPTION: xfmrs_data is given such that the tap is on
-                # the FROM bus.
+        # If we're considering off-nominal tap ratios, and this element
+        # has an off-nominal ratio, alter admittance elements.
+        if use_taps and (not pd.isnull(tap_ratio)):
+            # ASSUMPTION: xfmrs_data is given such that the tap is on
+            # the FROM bus.
 
-                # Adjust 'from' bus shunt admittance:
-                y_shunt[f] = y_shunt[f] * (1 / tap_ratio**2 - 1 / tap_ratio)
+            # TODO: Do shunts need to be scaled as in the pi-model
+            # depiction?
 
-                # Adjust 'to' bus shunt admittance:
-                y_shunt[t] = y_shunt[t] * (1 - 1 / tap_ratio)
+            # Add admittance to the [from, from] diagonal element.
+            y_bus.loc[f, f] += (y_series / tap_ratio**2) + (y_shunt / 2)
 
-                # Adjust the series admittance:
-                y_series = y_series / tap_ratio
+            # The [to, to] diagonal element is just like normal.
+            y_bus.loc[t, t] += y_series + y_shunt / 2
 
-        # Add admittance to diagonal elements:
-        for i in [f, t]:
-            y_bus.loc[i, i] += y_series + y_shunt[i] / 2
+            # Off-diagonals are scaled by tap_ratio.
+            y_bus.loc[f, t] -= y_series / tap_ratio
+            y_bus.loc[t, f] -= y_series / tap_ratio
 
-        # Subtract from off-diagonals.
-        y_bus.loc[f, t] -= y_series
-        y_bus.loc[t, f] -= y_series
+        else:
+            # Standard case, no off-nominal taps.
+
+            # Add admittance to diagonal elements:
+            for i in [f, t]:
+                y_bus.loc[i, i] += y_series + y_shunt / 2
+
+            # Subtract from off-diagonals.
+            y_bus.loc[f, t] -= y_series
+            y_bus.loc[t, f] -= y_series
 
     # Done, return.
     return y_bus
@@ -308,6 +316,6 @@ if __name__ == '__main__':
     main(use_taps=True, out_file=opj(OUT_DIR, 'hw_3_problem_1_output.txt'),
          solver='numpy')
 
-    # Problem 2: Do not use off-nominal taps, and use my lu solver.
+    # Problem 3: Do not use off-nominal taps, and use my lu solver.
     main(use_taps=False, out_file=opj(OUT_DIR, 'hw_3_problem_3_output.txt'),
          solver='lu')
