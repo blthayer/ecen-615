@@ -29,7 +29,7 @@ LINES_FILE = opj(IN_DIR, '5_bus_lines.csv')
 XFMRS_FILE = opj(IN_DIR, '5_bus_xfmrs.csv')
 
 # File for printing output:
-OUT_DIR = 'powerflow_files'
+OUT_DIR = 'hw3'
 OUT_FILE = opj(OUT_DIR, 'hw3_output.txt')
 
 # Pipe output to file.
@@ -313,9 +313,9 @@ def flat_start(bus_data):
 if __name__ == '__main__':
     # Homework 3:
     # Problem 1: Use off-nominal taps and the numpy solver.
-    main(use_taps=True, out_file=opj(OUT_DIR, 'hw_3_problem_1_output.txt'),
+    main(use_taps=True, out_file=opj(OUT_DIR, 'hw3_problem1_output.txt'),
          solver='numpy')
 
     # Problem 3: Do not use off-nominal taps, and use my lu solver.
-    main(use_taps=False, out_file=opj(OUT_DIR, 'hw_3_problem_3_output.txt'),
+    main(use_taps=False, out_file=opj(OUT_DIR, 'hw3_problem3_output.txt'),
          solver='lu')
