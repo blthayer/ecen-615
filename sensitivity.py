@@ -8,7 +8,7 @@ therefore indices are 0-(N-1)
 import pandas as pd
 import numpy as np
 
-LINE_DATA_FILE = 'B7Flat_DC_lines.csv'
+LINE_DATA_FILE = 'hw4/B7Flat_DC_lines.csv'
 
 
 def get_b_tilde(data):

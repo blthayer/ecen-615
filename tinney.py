@@ -159,7 +159,7 @@ def main():
 
     # bus_order_37 = list(ybus_37.index[deg_37['Bus'].values])
     print(tabulate([[x] for x in deg_37['Bus'] + 1],
-                   headers=['Tinney 1: 37 Bus']))
+                   headers=['Tinney 1: 37 Bus'], tablefmt="latex"))
 
     ####################################################################
     # Tinney 2
@@ -169,11 +169,11 @@ def main():
 
     print('')
     print(tabulate([[x] for x in np.array(order_37) + 1],
-                   headers=['Tinney 2: 37 Bus']))
+                   headers=['Tinney 2: 37 Bus'], tablefmt="latex"))
 
     fills = np.array(fills_37) + 1
     print('\nFills for 37 bus:')
-    print(tabulate(fills, headers=['From', 'To']))
+    print(tabulate(fills, headers=['From', 'To'], tablefmt="latex"))
 
     # Illustrate fills.
     adj_mat = get_adj_mat(ybus_37)
@@ -184,8 +184,8 @@ def main():
     ax.invert_yaxis()
     plt.plot(fills[:, 0], fills[:, 1], linestyle='None', marker='x', color='r')
     plt.plot(fills[:, 1], fills[:, 0], linestyle='None', marker='x', color='r')
-    # TODO: Save figure. Add gridlines? Probably not worth it.
-    plt.show()
+    # Save figure.
+    plt.savefig('tinney2.eps', type='eps')
 
 
 if __name__ == '__main__':
