@@ -157,7 +157,7 @@ def givens_s_c(a, b):
 def problem4():
     """Use Givens Rotation to perform QR factorization.
 
-    This is just a manual hard-code, not an attempt at a general
+    This is just a manual (nasty) hard-code, not an attempt at a general
     implementation.
     """
     A = np.array([[1, 2], [3, 4], [5, 6]])
@@ -170,14 +170,63 @@ def problem4():
     s, c = givens_s_c(a, b)
     g1 = np.array([
         [1, 0, 0],
-        [c, s, 0],
-        [-s, c, 1]
+        [0, c, s],
+        [0, -s, c]
     ])
 
+    print('G1:')
+    print(g1)
+
     g1a = np.matmul(g1.T, A)
+    g1a[np.isclose(g1a, 0)] = 0
     print('G1^T * A:')
     print(g1a)
-    pass
+
+    # Zero out A[2, 1]
+    i = 2 - 1
+    j = 1 - 1
+    a = g1a[i-1, j]
+    b = g1a[i, j]
+    s, c = givens_s_c(a, b)
+    g2 = np.array([
+        [c, s, 0],
+        [-s, c, 0],
+        [0, 0, 1]
+    ])
+
+    print('G2:')
+    print(g2)
+
+    g2a = np.matmul(g2.T, g1a)
+    g2a[np.isclose(g2a, 0)] = 0
+    print('G2^T * G1^T * A:')
+    print(g2a)
+
+    # Zero out A[3, 2]
+    i = 3 - 1
+    j = 2 - 1
+    a = g2a[i-1, j]
+    b = g2a[i, j]
+    s, c = givens_s_c(a, b)
+    g3 = np.array([
+        [1, 0, 0],
+        [0, c, s],
+        [0, -s, c]
+    ])
+
+    print('G3:')
+    print(g3)
+
+    g3a = np.matmul(g3.T, g2a)
+    g3a[np.isclose(g3a, 0)] = 0
+    print('G^3T * G2^T * G1^T * A:')
+    print(g3a)
+
+    # We're done, but need all of our G's multiplied together.
+    print('G1 * G2 * G3:')
+    g123 = np.matmul(np.matmul(g1, g2), g3)
+    print(g123)
+
 
 def linear_se(r, h, z):
     """Helper function for linear state estimation.
