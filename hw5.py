@@ -12,7 +12,7 @@ def problem1():
     z = np.array([0.6, 0.04, 0.405])
 
     # H matrix (relate measurements to states):
-    h = np.array([[5, -5], [2.5, -2.5], [0, 4]])
+    h = np.array([[5, -5], [2.5, 0], [0, -4]])
 
     # R matrix (std. deviation of measurements):
     r = np.zeros((3, 3))
@@ -102,12 +102,12 @@ def problem3():
 
         # compute h.
         h = np.array([
-            [v2*10*sin(-t2),         -v1*v2*cos(-t2),    v1*10*sin(-t2)],
-            [20*v1 - v2*10*cos(-t2), -v1*v2*10*sin(-t2), -v1*10*cos(-t2)],
-            [v2*10*sin(t2),          v1*v2*10*cos(t2),   v1*10*sin(t2)],
-            [-v2*10*cos(t2),         v1*v2*10*sin(t2),   20*v2-v1*10*cos(t2)],
-            [1,                      0,                  0],
-            [0,                      0,                  1]
+            [v2*10*sin(-t2),         -v1*v2*10*cos(-t2),  v1*10*sin(-t2)],
+            [20*v1 - v2*10*cos(-t2), -v1*v2*10*sin(-t2),  -v1*10*cos(-t2)],
+            [v2*10*sin(t2),          v1*v2*10*cos(t2),    v1*10*sin(t2)],
+            [-v2*10*cos(t2),         v1*v2*10*sin(t2),    20*v2-v1*10*cos(t2)],
+            [1,                      0,                   0],
+            [0,                      0,                   1]
         ])
 
         # Compute z - f(x)
@@ -266,8 +266,8 @@ def linear_se(r, h, z):
 def main():
     # problem1()
     # problem2()
-    # problem3()
-    problem4()
+    problem3()
+    # problem4()
 
 
 if __name__ == '__main__':
