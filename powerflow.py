@@ -41,7 +41,8 @@ TOL = 0.1 / MVA_BASE
 
 
 def main(bus_file=BUS_FILE, lines_file=LINES_FILE, xfmrs_file=XFMRS_FILE,
-         out_file=OUT_FILE, use_taps=False, solver='lu', tablefmt='latex'):
+         out_file=OUT_FILE, use_taps=False, solver='lu', tablefmt='latex',
+         flat_flag=True):
     """Solve the power flow.
 
     bus_file should have the following columns: Bus, Type, V_pu, P_G,
@@ -78,7 +79,7 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE, xfmrs_file=XFMRS_FILE,
     I_not_p = I_not[1:, 1:]
 
     # Initialize flat start.
-    v, theta = flat_start(bus_data)
+    v, theta = flat_start(bus_data, flat_flag)
 
     # Get the y_bus matrix.
     lines_data = pd.read_csv(lines_file)
@@ -197,6 +198,8 @@ def main(bus_file=BUS_FILE, lines_file=LINES_FILE, xfmrs_file=XFMRS_FILE,
                     'Reactive Power (Mvar)': gen_q}, headers='keys',
                    tablefmt=tablefmt), file=f_out)
 
+    return theta, v
+
 
 def get_y_bus(bus_data, lines_data, xfmrs_data, use_taps):
     """
@@ -294,15 +297,26 @@ def get_bus_power(v, ykn_vn, cos_mat, sin_mat):
     return p, q
 
 
-def flat_start(bus_data):
-    """Using the bus data, formulate a flat start."""
+def flat_start(bus_data, flat_flag=True):
+    """Using the bus data, formulate a flat start.
+
+    Start at low voltage (0.25) if the flag is False.
+    """
 
     # Initialize voltages to 1.
     v = np.ones(bus_data.shape[0])
 
+    if not flat_flag:
+        # Attempt to find low voltage solution by starting at 0.25 pu.
+        v = v * 0.25
+
     # Replace voltages at PV buses.
     pv_buses = bus_data['Type'] == 'PV'
     v[pv_buses] = bus_data[pv_buses]['V_pu'].values
+
+    # Ensure the slack bus initializes correctly
+    swing_bus = bus_data['Type'] == 'Swing'
+    v[swing_bus] = bus_data[swing_bus]['V_pu'].values
 
     # Initialize angles to 0. Calculated everywhere except the swing.
     theta = np.zeros(bus_data.shape[0])

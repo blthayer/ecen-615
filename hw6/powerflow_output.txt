@@ -1,0 +1,53 @@
+Voltages and angles at each iteration:
+Iteration 0:
+  Bus    Voltage (pu)    Angle (degrees)
+-----  --------------  -----------------
+    1               1                  0
+    2               1                  0
+
+Iteration 1:
+  Bus    Voltage (pu)    Angle (degrees)
+-----  --------------  -----------------
+    1        1                    0
+    2        0.956116           -26.0123
+
+Iteration 2:
+  Bus    Voltage (pu)    Angle (degrees)
+-----  --------------  -----------------
+    1        1                     0
+    2        0.811397            -32.557
+
+Iteration 3:
+  Bus    Voltage (pu)    Angle (degrees)
+-----  --------------  -----------------
+    1         1                   0
+    2         0.74393           -37.0528
+
+Iteration 4:
+  Bus    Voltage (pu)    Angle (degrees)
+-----  --------------  -----------------
+    1        1                    0
+    2        0.710135           -39.5723
+
+Iteration 5:
+  Bus    Voltage (pu)    Angle (degrees)
+-----  --------------  -----------------
+    1        1                    0
+    2        0.692917           -40.8887
+
+Iteration 6:
+  Bus    Voltage (pu)    Angle (degrees)
+-----  --------------  -----------------
+    1        1                    0
+    2        0.684187           -41.5599
+
+Iteration 7:
+  Bus    Voltage (pu)    Angle (degrees)
+-----  --------------  -----------------
+    1        1                    0
+    2        0.679788           -41.8986
+
+Final Generator Outputs:
+  Generator Bus    Active Power (MW)    Reactive Power (Mvar)
+---------------  -------------------  -----------------------
+              1              453.973                  494.015
