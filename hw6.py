@@ -2,6 +2,7 @@
 import numpy as np
 import os
 import powerflow
+import matplotlib.pyplot as plt
 
 # Directories
 DIR = 'hw6'
@@ -102,22 +103,37 @@ def problem1():
     pass
 
 
+def problem2():
+    """PV curve for Bus37_PV PowerWorld case."""
+    p = np.array([5.2, 6.24, 7.28, 8.32, 9.36, 10.4, 11.44, 12.48, 13.51,
+                  14.55, 15.58, 16.39])
+    v = np.array([0.99516,  0.99277,  0.98564,  0.98168,  0.98070,  0.97466,
+                  0.96816,  0.96289,  0.95058,  0.91437,  0.85810,  0.73431])
+
+    plt.plot(p, v, marker='o')
+    plt.xlabel('Total load (per unit, 100 MVA base)')
+    plt.ylabel('Voltage (pu) at MAPLE69')
+    plt.savefig('maple_pv.eps', type='eps')
+
+
 if __name__ == '__main__':
     # Write line and transformer files.
 
     # Start with the directory.
-    try:
-        os.mkdir(DIR)
-    except FileExistsError:
-        # No worries if the directory already exists.
-        pass
+    # try:
+    #     os.mkdir(DIR)
+    # except FileExistsError:
+    #     # No worries if the directory already exists.
+    #     pass
+    #
+    # # Write files.
+    # with open(LINE_FILE, 'w') as f:
+    #     f.write(LINE_STR)
+    #
+    # with open(XFMR_FILE, 'w') as f:
+    #     f.write(XFMR_STR)
+    #
+    # # Run code for problem 1.
+    # problem1()
 
-    # Write files.
-    with open(LINE_FILE, 'w') as f:
-        f.write(LINE_STR)
-
-    with open(XFMR_FILE, 'w') as f:
-        f.write(XFMR_STR)
-
-    # Run code for problem 1.
-    problem1()
+    problem2()
